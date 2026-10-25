@@ -227,9 +227,9 @@ export const ChangePasswordScreen = () => {
       return;
     }
     try {
-      await changePassword({ variables: { currentPassword: current, newPassword: password } });
+      const { data } = await changePassword({ variables: { currentPassword: current, newPassword: password } });
       notify("Contraseña actualizada");
-      await markPasswordChanged();
+      await markPasswordChanged(data?.changePassword?.token);
       if (navigation.canGoBack()) {
         navigation.goBack();
       }

@@ -52,7 +52,7 @@ EXPO_PUBLIC_API_URL=http://192.168.1.50:3000/graphql
 ## Seguridad
 
 - En el teléfono la sesión se guarda cifrada en el almacén seguro del dispositivo (Keychain en iOS, Keystore en Android) con `expo-secure-store`; en la versión web se usa el almacenamiento del navegador.
-- Si el servidor informa que el token expiró, la app cierra la sesión y avisa.
+- Si el servidor informa que el token expiró o fue revocado (por ejemplo, tras cambiar la contraseña desde otro dispositivo), la app cierra la sesión y avisa.
 - Las contraseñas deben tener entre 8 y 72 caracteres, con letras y números, igual que en la API; para cambiarla se pide la contraseña actual (o la temporal).
 - Una pantalla de error evita que la app quede en blanco si algo falla.
 

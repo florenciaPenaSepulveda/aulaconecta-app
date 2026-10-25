@@ -4,7 +4,7 @@ import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { ChangePasswordScreen, ForgotPassScreen, LoginScreen, RegisterScreen } from "./auth";
 import { CHANGE_PASSWORD, FORGOT_PASS, LOGIN, REGISTER } from "../graphql";
 import { notify } from "../lib/alerts";
-import { notifySessionExpired } from "../lib/session";
+import { getCurrentToken, notifySessionExpired } from "../lib/session";
 import { fail, makeNavigation, makeSession, ok, renderScreen } from "../test/utils";
 
 const press = (text: string) => fireEvent.press(screen.getAllByText(text).slice(-1)[0]);
@@ -146,7 +146,7 @@ describe("ForgotPassScreen", () => {
 });
 
 describe("ChangePasswordScreen", () => {
-  const render = (session = makeSession("teacher", { isChangePassword: true }), mocks = [ok(CHANGE_PASSWORD, { currentPassword: "Demo1234", newPassword: "Clave12345" }, { changePassword: { message: "ok" } })]) =>
+  const render = (session = makeSession("teacher", { isChangePassword: true }), mocks = [ok(CHANGE_PASSWORD, { currentPassword: "Demo1234", newPassword: "Clave12345" }, { changePassword: { message: "ok", token: "token-nuevo" } })]) =>
     renderScreen(<ChangePasswordScreen />, { session, mocks, withNavigation: true });
 
   it("actualiza la contraseña y marca la sesión como actualizada", async () => {
@@ -157,6 +157,8 @@ describe("ChangePasswordScreen", () => {
     fireEvent.changeText(screen.getByLabelText("Confirmar contraseña"), "Clave12345");
     press("Guardar contraseña");
     await waitFor(async () => expect(JSON.parse((await SecureStore.getItemAsync("aulaconecta.session")) ?? "{}").isChangePassword).toBe(false));
+    expect(JSON.parse((await SecureStore.getItemAsync("aulaconecta.session")) ?? "{}").token).toBe("token-nuevo");
+    expect(getCurrentToken()).toBe("token-nuevo");
     expect(notify).toHaveBeenCalledWith("Contraseña actualizada");
   });
 

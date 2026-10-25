@@ -7,7 +7,7 @@ interface AuthContextValue {
   session: Session | null;
   ready: boolean;
   signIn: (session: Session) => Promise<void>;
-  markPasswordChanged: () => Promise<void>;
+  markPasswordChanged: (token?: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -32,11 +32,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setSession(next);
   }, []);
 
-  const markPasswordChanged = useCallback(async () => {
+  const markPasswordChanged = useCallback(async (token?: string) => {
     if (!session) {
       return;
     }
-    const next = { ...session, isChangePassword: false };
+    const next = { ...session, isChangePassword: false, ...(token ? { token } : {}) };
+    if (token) {
+      setCurrentToken(token);
+    }
     await saveSession(next);
     setSession(next);
   }, [session]);

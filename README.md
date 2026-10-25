@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/florenciaPenaSepulveda/aulaconecta-app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/florenciaPenaSepulveda/aulaconecta-app/actions/workflows/ci.yml)
 
-Aplicación móvil de **AulaConecta**, plataforma de gestión escolar para profesores y apoderados. Construida con Expo y React Native; también corre en el navegador.
+Aplicación móvil de **AulaConecta**, plataforma de gestión escolar para profesores y apoderados. Construida con Expo SDK 58, React Native 0.88 y React 19; también corre en el navegador.
 
 ## Repositorios del proyecto
 
@@ -55,6 +55,7 @@ EXPO_PUBLIC_API_URL=http://192.168.1.50:3000/graphql
 - Si el servidor informa que el token expiró o fue revocado (por ejemplo, tras cambiar la contraseña desde otro dispositivo), la app cierra la sesión y avisa.
 - Las contraseñas deben tener entre 8 y 72 caracteres, con letras y números, igual que en la API; para cambiarla se pide la contraseña actual (o la temporal).
 - Una pantalla de error evita que la app quede en blanco si algo falla.
+- `npm audit --omit=dev` no reporta vulnerabilidades en el código que llega a la app. Queda solo `node-forge`, dependencia de la herramienta de desarrollo `@expo/cli`, que aún no tiene versión corregida; `zod` se fuerza a una versión segura con `overrides`.
 
 ## Pruebas
 

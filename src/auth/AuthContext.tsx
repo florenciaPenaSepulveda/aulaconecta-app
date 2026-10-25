@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useApolloClient } from "@apollo/client";
-import { Session, loadSession, saveSession, setCurrentToken } from "../lib/session";
+import { notify } from "../lib/alerts";
+import { Session, loadSession, onSessionExpired, saveSession, setCurrentToken } from "../lib/session";
 
 interface AuthContextValue {
   session: Session | null;
@@ -46,6 +47,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setSession(null);
     await client.clearStore();
   }, [client]);
+
+  useEffect(
+    () =>
+      onSessionExpired(() => {
+        notify("Tu sesión expiró", "Inicia sesión nuevamente para continuar.");
+        void signOut();
+      }),
+    [signOut],
+  );
 
   const value = useMemo(
     () => ({ session, ready, signIn, markPasswordChanged, signOut }),

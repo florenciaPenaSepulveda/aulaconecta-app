@@ -26,6 +26,9 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "scheme": "aulaconecta"
+    "scheme": "aulaconecta",
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }

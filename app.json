@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "CloseIA",
-    "slug": "CloseIA",
+    "name": "AulaConecta",
+    "slug": "aulaconecta",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,25 +9,23 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1f3a5f"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourapp.identifier"
+      "bundleIdentifier": "cl.aulaconecta.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1f3a5f"
       },
-      "package": "com.yourapp.identifier"
+      "package": "cl.aulaconecta.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
-    "scheme": "closeia",  
-    "deepLinking": {
-      "enabled": true
-    }
+    "scheme": "aulaconecta"
   }
 }

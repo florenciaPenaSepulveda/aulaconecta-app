@@ -1,5 +1,7 @@
 # AulaConecta · App
 
+[![CI](https://github.com/florenciaPenaSepulveda/aulaconecta-app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/florenciaPenaSepulveda/aulaconecta-app/actions/workflows/ci.yml)
+
 Aplicación móvil de **AulaConecta**, plataforma de gestión escolar para profesores y apoderados. Construida con Expo y React Native; también corre en el navegador.
 
 ## Repositorios del proyecto

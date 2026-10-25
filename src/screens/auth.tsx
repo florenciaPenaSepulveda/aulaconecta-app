@@ -5,6 +5,7 @@ import { useMutation } from "@apollo/client";
 import { useAuth } from "../auth/AuthContext";
 import { Button, Card, Field, Screen } from "../components/ui";
 import { CHANGE_PASSWORD, FORGOT_PASS, LOGIN, REGISTER } from "../graphql";
+import { passwordError } from "../lib/password";
 import { errorMessage, notify } from "../lib/alerts";
 import { formatRut, isValidRut } from "../lib/rut";
 import { normalizeRole } from "../lib/session";
@@ -99,8 +100,9 @@ export const RegisterScreen = ({ navigation }: { navigation: any }) => {
       notify("Revisa los datos", "El RUT ingresado no es válido.");
       return;
     }
-    if (form.password.length < 8) {
-      notify("Revisa los datos", "La contraseña debe tener al menos 8 caracteres.");
+    const problema = passwordError(form.password);
+    if (problema) {
+      notify("Revisa los datos", problema);
       return;
     }
     if (form.password !== form.confirm) {
@@ -177,7 +179,7 @@ export const ForgotPassScreen = ({ navigation }: { navigation: any }) => {
     }
     try {
       await forgotPass({ variables: { email: email.trim() } });
-      notify("Revisa tu correo", "Te enviamos una contraseña temporal para ingresar.");
+      notify("Revisa tu correo", "Si el correo está registrado, te enviamos una contraseña temporal para ingresar.");
       navigation.navigate("Login");
     } catch (error) {
       notify("No se pudo enviar el correo", errorMessage(error));
@@ -206,8 +208,9 @@ export const ChangePasswordScreen = () => {
   const [changePassword, { loading }] = useMutation(CHANGE_PASSWORD);
 
   const handleSubmit = async () => {
-    if (password.length < 8) {
-      notify("Revisa los datos", "La contraseña debe tener al menos 8 caracteres.");
+    const problema = passwordError(password);
+    if (problema) {
+      notify("Revisa los datos", problema);
       return;
     }
     if (password !== confirm) {

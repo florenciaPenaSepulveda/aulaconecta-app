@@ -34,5 +34,8 @@ export const errorMessage = (error: unknown, fallback = "Ocurrió un error inesp
       ? "No se pudo conectar con el servidor. Verifica que el backend esté activo."
       : fallback;
   }
+  if (/Too Many Requests/i.test(message)) {
+    return "Demasiados intentos. Espera un minuto e inténtalo de nuevo.";
+  }
   return message;
 };

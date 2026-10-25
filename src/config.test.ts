@@ -14,15 +14,15 @@ describe("API_URL", () => {
     Platform.OS = originalOS;
   });
 
-  it("usa localhost en la web", () => {
+  it("usa localhost en la web", async () => {
     expect(load("web")).toBe("http://localhost:3000/graphql");
   });
 
-  it("deduce la IP del computador desde Expo Go", () => {
+  it("deduce la IP del computador desde Expo Go", async () => {
     expect(load("android", "192.168.1.5:8081")).toBe("http://192.168.1.5:3000/graphql");
   });
 
-  it("usa valores por defecto en emuladores", () => {
+  it("usa valores por defecto en emuladores", async () => {
     expect(load("android")).toBe("http://10.0.2.2:3000/graphql");
     expect(load("ios")).toBe("http://localhost:3000/graphql");
   });

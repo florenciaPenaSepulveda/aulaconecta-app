@@ -10,7 +10,7 @@ import { getCurrentToken, loadSession, normalizeRole, notifySessionExpired, onSe
 const alerts = jest.requireActual("./alerts") as typeof import("./alerts");
 
 describe("rut", () => {
-  it("formatea y valida", () => {
+  it("formatea y valida", async () => {
     expect(formatRut("123456785")).toBe("12.345.678-5");
     expect(formatRut("1")).toBe("1");
     expect(isValidRut("12.345.678-5")).toBe(true);
@@ -21,7 +21,7 @@ describe("rut", () => {
 });
 
 describe("format", () => {
-  it("formatea fechas, notas y promedios", () => {
+  it("formatea fechas, notas y promedios", async () => {
     expect(formatDate("2026-10-24T15:30:00")).toMatch(/2026/);
     expect(formatTime("2026-10-24T15:30:00")).toBeTruthy();
     expect(formatGrade(5.64)).toBe("5.6");
@@ -34,11 +34,11 @@ describe("format", () => {
 });
 
 describe("passwordError", () => {
-  it("acepta contraseñas con letras y números", () => {
+  it("acepta contraseñas con letras y números", async () => {
     expect(passwordError("Clave12345")).toBe("");
   });
 
-  it("rechaza las muy cortas, las sin números o letras y las demasiado largas", () => {
+  it("rechaza las muy cortas, las sin números o letras y las demasiado largas", async () => {
     expect(passwordError("Ab1")).toMatch(/al menos 8/);
     expect(passwordError("soloLetrasAqui")).toMatch(/letras y números/);
     expect(passwordError("123456789")).toMatch(/letras y números/);
@@ -62,7 +62,7 @@ describe("session", () => {
     expect(await loadSession()).toBeNull();
   });
 
-  it("administra el token en memoria y normaliza el rol", () => {
+  it("administra el token en memoria y normaliza el rol", async () => {
     setCurrentToken("abc");
     expect(getCurrentToken()).toBe("abc");
     setCurrentToken(null);
@@ -93,7 +93,7 @@ describe("session", () => {
     restaurar.restore();
   });
 
-  it("avisa a los oyentes cuando la sesión expira y permite darse de baja", () => {
+  it("avisa a los oyentes cuando la sesión expira y permite darse de baja", async () => {
     const oyente = jest.fn();
     const baja = onSessionExpired(oyente);
     notifySessionExpired();
@@ -111,7 +111,7 @@ describe("alerts", () => {
     jest.restoreAllMocks();
   });
 
-  it("usa Alert en dispositivos", () => {
+  it("usa Alert en dispositivos", async () => {
     const spy = jest.spyOn(Alert, "alert").mockImplementation(() => undefined);
     alerts.notify("Título", "Mensaje");
     expect(spy).toHaveBeenCalledWith("Título", "Mensaje");
@@ -144,7 +144,7 @@ describe("alerts", () => {
     await expect(alerts.confirmAction("Título", "Mensaje")).resolves.toBe(false);
   });
 
-  it("extrae mensajes de error amigables", () => {
+  it("extrae mensajes de error amigables", async () => {
     expect(alerts.errorMessage({ graphQLErrors: [{ message: "Detalle" }] })).toBe("Detalle");
     expect(alerts.errorMessage(new Error("Directo"))).toBe("Directo");
     expect(alerts.errorMessage(new Error("Bad Request Exception"), "Genérico")).toBe("Genérico");

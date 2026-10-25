@@ -37,14 +37,14 @@ const startWith = async (session: ReturnType<typeof makeSession> | null) => {
     await SecureStore.setItemAsync("aulaconecta.session", JSON.stringify(session));
   }
   mockFetch();
-  return render(<App />);
+  return await render(<App />);
 };
 
 describe("App", () => {
   it("muestra el ingreso cuando no hay sesión", async () => {
     await startWith(null);
     expect((await screen.findAllByText("Iniciar sesión")).length).toBeGreaterThan(0);
-    fireEvent.press(screen.getByText("Regístrate"));
+    await fireEvent.press(screen.getByText("Regístrate"));
     expect((await screen.findAllByText("Crear cuenta")).length).toBeGreaterThan(0);
   });
 
@@ -57,20 +57,20 @@ describe("App", () => {
     await startWith(makeSession("parents", { firstName: "Paula", id: 4 }));
     expect(await screen.findByText("Hola, Paula")).toBeTruthy();
     expect(await screen.findByText("Juan Pérez")).toBeTruthy();
-    fireEvent.press(screen.getByText("Anuncios"));
+    await fireEvent.press(screen.getByText("Anuncios"));
     expect(await screen.findByText("Comunicados del colegio")).toBeTruthy();
-    fireEvent.press(screen.getByText("Mensajes"));
+    await fireEvent.press(screen.getByText("Mensajes"));
     expect(await screen.findByText("Conversa con los profesores de tus pupilos")).toBeTruthy();
-    fireEvent.press(screen.getByText("Perfil"));
+    await fireEvent.press(screen.getByText("Perfil"));
     expect(await screen.findByText("Tu cuenta en AulaConecta")).toBeTruthy();
-    fireEvent.press(screen.getByText("Cambiar contraseña"));
+    await fireEvent.press(screen.getByText("Cambiar contraseña"));
     expect((await screen.findAllByText("Cambiar contraseña")).length).toBeGreaterThan(0);
   });
 
   it("muestra las asignaturas del profesor y abre la asistencia por curso", async () => {
     await startWith(makeSession("teacher"));
     expect(await screen.findByText("Matemática")).toBeTruthy();
-    fireEvent.press(screen.getByText("Asistencia por curso"));
+    await fireEvent.press(screen.getByText("Asistencia por curso"));
     await waitFor(() => expect(screen.getAllByText("Asistencia por curso").length).toBeGreaterThan(0));
   });
 });

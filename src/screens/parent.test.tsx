@@ -46,7 +46,7 @@ describe("ParentHomeScreen", () => {
     expect(await screen.findByText("5.0")).toBeTruthy();
     expect(await screen.findByText("70%")).toBeTruthy();
     expect(await screen.findByText("Reunión")).toBeTruthy();
-    fireEvent.press(screen.getByText("Ver detalle académico"));
+    await fireEvent.press(screen.getByText("Ver detalle académico"));
     expect(navigation.navigate).toHaveBeenCalledWith("ChildDetail", { child: expect.objectContaining({ id: "5" }) });
   });
 
@@ -104,7 +104,7 @@ describe("ChildDetailScreen", () => {
       mocks: [ok(GRADES_BY_STUDENT, { studentId: 5 }, { gradesByStudentId: [] }), ok(ATTENDANCE_BY_STUDENT, { studentId: 5 }, { attendanceByStudent: [] })],
     });
     expect(await screen.findByText("Sin asignaturas")).toBeTruthy();
-    empty.unmount();
+    await empty.unmount();
     await renderScreen(<ChildDetailScreen route={route} />, {
       session: makeSession("parents"),
       mocks: [fail(GRADES_BY_STUDENT, { studentId: 5 }), ok(ATTENDANCE_BY_STUDENT, { studentId: 5 }, attendance)],

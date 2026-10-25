@@ -7,8 +7,8 @@ describe("ErrorBoundary", () => {
     jest.spyOn(console, "error").mockImplementation(() => undefined);
   });
 
-  it("muestra el contenido cuando no hay errores", () => {
-    render(
+  it("muestra el contenido cuando no hay errores", async () => {
+    await render(
       <ErrorBoundary>
         <></>
       </ErrorBoundary>,
@@ -16,7 +16,7 @@ describe("ErrorBoundary", () => {
     expect(screen.queryByText("Algo salió mal")).toBeNull();
   });
 
-  it("muestra un mensaje y permite reintentar cuando algo falla", () => {
+  it("muestra un mensaje y permite reintentar cuando algo falla", async () => {
     let fallar = true;
     const Roto = () => {
       if (fallar) {
@@ -25,14 +25,14 @@ describe("ErrorBoundary", () => {
       return null;
     };
     const alReintentar = jest.fn();
-    render(
+    await render(
       <ErrorBoundary onReload={alReintentar}>
         <Roto />
       </ErrorBoundary>,
     );
     expect(screen.getByText("Algo salió mal")).toBeTruthy();
     fallar = false;
-    fireEvent.press(screen.getByText("Reintentar"));
+    await fireEvent.press(screen.getByText("Reintentar"));
     expect(alReintentar).toHaveBeenCalled();
     expect(screen.queryByText("Algo salió mal")).toBeNull();
   });

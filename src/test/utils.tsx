@@ -62,7 +62,7 @@ interface Options {
 export const renderScreen = async (ui: React.ReactElement, { session = null, mocks = [], withNavigation = false }: Options = {}) => {
   await prepare(session);
   const content = withNavigation ? <NavigationContainer>{ui}</NavigationContainer> : ui;
-  const result = render(
+  const result = await render(
     <MockedProvider mocks={mocks} addTypename={false}>
       <AuthProvider>
         <Gate>{content}</Gate>

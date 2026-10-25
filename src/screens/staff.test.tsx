@@ -106,11 +106,11 @@ describe("SubjectsScreen", () => {
     const navigation = makeNavigation();
     await renderScreen(<SubjectsScreen navigation={navigation} />, { session: makeSession("teacher"), mocks: teacherMocks });
     expect(await screen.findByText("Matemática")).toBeTruthy();
-    fireEvent.press(screen.getByText("Asistencia"));
+    await fireEvent.press(screen.getByText("Asistencia"));
     expect(navigation.navigate).toHaveBeenCalledWith("SubjectDetail", { subjectId: 10 });
-    fireEvent.press(screen.getByText("Notas"));
+    await fireEvent.press(screen.getByText("Notas"));
     expect(navigation.navigate).toHaveBeenCalledWith("Grades", { subjectId: 10 });
-    fireEvent.press(screen.getByText("Asistencia por curso"));
+    await fireEvent.press(screen.getByText("Asistencia por curso"));
     expect(navigation.navigate).toHaveBeenCalledWith("CourseAttendance");
   });
 
@@ -123,13 +123,13 @@ describe("SubjectsScreen", () => {
       ],
     });
     await screen.findByText("Matemática");
-    fireEvent.press(screen.getByText("Nueva asignatura"));
-    fireEvent.press(screen.getByText("Crear asignatura"));
+    await fireEvent.press(screen.getByText("Nueva asignatura"));
+    await fireEvent.press(screen.getByText("Crear asignatura"));
     expect(notify).toHaveBeenLastCalledWith("Revisa los datos", expect.any(String));
-    fireEvent.changeText(screen.getByLabelText("Nombre"), "Física");
-    fireEvent.changeText(screen.getByLabelText("Cantidad de clases"), "30");
-    fireEvent.press((await screen.findAllByText("1° Básico A"))[0]);
-    fireEvent.press(screen.getByText("Crear asignatura"));
+    await fireEvent.changeText(screen.getByLabelText("Nombre"), "Física");
+    await fireEvent.changeText(screen.getByLabelText("Cantidad de clases"), "30");
+    await fireEvent.press((await screen.findAllByText("1° Básico A"))[0]);
+    await fireEvent.press(screen.getByText("Crear asignatura"));
     await waitFor(() => expect(screen.queryByText("Crear asignatura")).toBeNull());
   });
 
@@ -142,13 +142,13 @@ describe("SubjectsScreen", () => {
       ],
     });
     await screen.findByText("Matemática");
-    fireEvent.press(screen.getByText("Nueva asignatura"));
-    fireEvent.changeText(screen.getByLabelText("Nombre"), "Física");
-    fireEvent.changeText(screen.getByLabelText("Cantidad de clases"), "30");
-    fireEvent.press((await screen.findAllByText("1° Básico A"))[0]);
-    fireEvent.press(screen.getByText("Crear asignatura"));
+    await fireEvent.press(screen.getByText("Nueva asignatura"));
+    await fireEvent.changeText(screen.getByLabelText("Nombre"), "Física");
+    await fireEvent.changeText(screen.getByLabelText("Cantidad de clases"), "30");
+    await fireEvent.press((await screen.findAllByText("1° Básico A"))[0]);
+    await fireEvent.press(screen.getByText("Crear asignatura"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("No se pudo crear", expect.any(String)));
-    fireEvent.press(screen.getByText("Cancelar"));
+    await fireEvent.press(screen.getByText("Cancelar"));
   });
 
   it("el administrador ve todas las asignaturas sin poder crear desde la app", async () => {
@@ -166,7 +166,7 @@ describe("SubjectsScreen", () => {
       mocks: [ok(SUBJECTS_BY_TEACHER, { idTeacher: 1 }, { getAllSubjectByIdTeacher: [] }), ok(LIST_COURSES, undefined, { listCourses: [] })],
     });
     expect(await screen.findByText("No hay asignaturas")).toBeTruthy();
-    empty.unmount();
+    await empty.unmount();
     await renderScreen(<SubjectsScreen navigation={makeNavigation()} />, {
       session: makeSession("teacher"),
       mocks: [fail(SUBJECTS_BY_TEACHER, { idTeacher: 1 }), ok(LIST_COURSES, undefined, { listCourses: [] })],
@@ -204,8 +204,8 @@ describe("SubjectDetailScreen", () => {
       ok(TAKE_ASIST, { createAsistInput: { date: todayLocal(), asistencias: [{ idUser: 5, idSubject: 10, asist: 0, absences: 1 }] } }, { takeAsist: true }),
     ]);
     await screen.findByText("Juan Pérez");
-    fireEvent(screen.getByRole("switch"), "valueChange", false);
-    fireEvent.press(screen.getByText("Registrar asistencia"));
+    await fireEvent(screen.getByRole("switch"), "valueChange", false);
+    await fireEvent.press(screen.getByText("Registrar asistencia"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("Asistencia registrada"));
   });
 
@@ -215,19 +215,19 @@ describe("SubjectDetailScreen", () => {
       ok(TAKE_ASIST, { createAsistInput: { date: "2026-10-02", asistencias: [{ idUser: 5, idSubject: 10, asist: 1, absences: 0 }] } }, { takeAsist: true }),
     ]);
     await screen.findByText("Juan Pérez");
-    fireEvent.changeText(screen.getByLabelText("Fecha de la clase (AAAA-MM-DD)"), "2026-10-02");
+    await fireEvent.changeText(screen.getByLabelText("Fecha de la clase (AAAA-MM-DD)"), "2026-10-02");
     expect(await screen.findByText("Ya registrada: se actualizará")).toBeTruthy();
     expect(screen.getByRole("switch").props.value).toBe(false);
-    fireEvent(screen.getByRole("switch"), "valueChange", true);
-    fireEvent.press(screen.getByText("Registrar asistencia"));
+    await fireEvent(screen.getByRole("switch"), "valueChange", true);
+    await fireEvent.press(screen.getByText("Registrar asistencia"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("Asistencia registrada"));
   });
 
   it("rechaza fechas con formato inválido o futuras", async () => {
     await render();
     await screen.findByText("Juan Pérez");
-    fireEvent.changeText(screen.getByLabelText("Fecha de la clase (AAAA-MM-DD)"), "24-10-2026");
-    fireEvent.press(screen.getByText("Registrar asistencia"));
+    await fireEvent.changeText(screen.getByLabelText("Fecha de la clase (AAAA-MM-DD)"), "24-10-2026");
+    await fireEvent.press(screen.getByText("Registrar asistencia"));
     expect(notify).toHaveBeenCalledWith("Revisa los datos", "Ingresa una fecha válida (AAAA-MM-DD) que no sea futura.");
   });
 
@@ -235,14 +235,14 @@ describe("SubjectDetailScreen", () => {
     const navigation = makeNavigation();
     await render(baseMocks(), navigation);
     await screen.findByText("Juan Pérez");
-    fireEvent.press(screen.getByText("Ver calendario de asistencia"));
+    await fireEvent.press(screen.getByText("Ver calendario de asistencia"));
     expect(navigation.navigate).toHaveBeenCalledWith("AttendanceCalendar", { subjectId: 10 });
   });
 
   it("informa cuando falla el registro", async () => {
     await render([...baseMocks(), fail(TAKE_ASIST, { createAsistInput: { date: todayLocal(), asistencias: [{ idUser: 5, idSubject: 10, asist: 1, absences: 0 }] } })]);
     await screen.findByText("Juan Pérez");
-    fireEvent.press(screen.getByText("Registrar asistencia"));
+    await fireEvent.press(screen.getByText("Registrar asistencia"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("No se pudo registrar", expect.any(String)));
   });
 
@@ -253,27 +253,27 @@ describe("SubjectDetailScreen", () => {
       ok(UNENROLL_STUDENT, { idUser: 5, idSubject: 10 }, { unenrollStudent: true }),
     ]);
     await screen.findByText("Juan Pérez");
-    fireEvent.press(screen.getByText("Inscribir"));
-    fireEvent.press(screen.getByText("Quitar"));
+    await fireEvent.press(screen.getByText("Inscribir"));
+    await fireEvent.press(screen.getByText("Quitar"));
     await waitFor(() => expect(confirmAction).toHaveBeenCalled());
   });
 
   it("reporta errores de inscripción y respeta la cancelación al retirar", async () => {
     await render([...baseMocks(), fail(ENROLL_STUDENT, { idUser: 6, idSubject: 10 }), fail(UNENROLL_STUDENT, { idUser: 5, idSubject: 10 })]);
     await screen.findByText("Juan Pérez");
-    fireEvent.press(screen.getByText("Inscribir"));
+    await fireEvent.press(screen.getByText("Inscribir"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("No se pudo inscribir", expect.any(String)));
     (confirmAction as jest.Mock).mockResolvedValueOnce(false);
-    fireEvent.press(screen.getByText("Quitar"));
+    await fireEvent.press(screen.getByText("Quitar"));
     await waitFor(() => expect(confirmAction).toHaveBeenCalledTimes(1));
-    fireEvent.press(screen.getByText("Quitar"));
+    await fireEvent.press(screen.getByText("Quitar"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("No se pudo quitar", expect.any(String)));
   });
 
   it("abre la ficha de asistencia de un estudiante", async () => {
     const navigation = makeNavigation();
     await render(baseMocks(), navigation);
-    fireEvent.press(await screen.findByText("Juan Pérez"));
+    await fireEvent.press(await screen.findByText("Juan Pérez"));
     expect(navigation.navigate).toHaveBeenCalledWith("StudentAttendance", { student: expect.objectContaining({ id: "5" }) });
   });
 
@@ -281,7 +281,7 @@ describe("SubjectDetailScreen", () => {
     const navigation = makeNavigation();
     await render(baseMocks(), navigation);
     await screen.findByText("Juan Pérez");
-    fireEvent.press(screen.getByText("Ir a notas"));
+    await fireEvent.press(screen.getByText("Ir a notas"));
     expect(navigation.navigate).toHaveBeenCalledWith("Grades", { subjectId: 10 });
   });
 
@@ -294,7 +294,7 @@ describe("SubjectDetailScreen", () => {
     ]);
     expect(await screen.findByText("Sin estudiantes inscritos")).toBeTruthy();
     expect(screen.getByText("No hay más estudiantes disponibles.")).toBeTruthy();
-    fireEvent.press(screen.getByText("Ir a notas"));
+    await fireEvent.press(screen.getByText("Ir a notas"));
   });
 
   it("informa cuando la asignatura no existe", async () => {
@@ -330,8 +330,8 @@ describe("GradesScreen", () => {
       ...baseMocks,
       ok(UPDATE_GRADE, { id: 1, updateGradeDto: { grade: 6.5, studentId: 5, subjectId: 10 } }, { updateGrade: { id: "1" } }),
     ]);
-    fireEvent.changeText(await screen.findByDisplayValue("5.5"), "6,5");
-    fireEvent.press(screen.getByText("Guardar cambios (1)"));
+    await fireEvent.changeText(await screen.findByDisplayValue("5.5"), "6,5");
+    await fireEvent.press(screen.getByText("Guardar cambios (1)"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("Notas guardadas"));
   });
 
@@ -341,28 +341,28 @@ describe("GradesScreen", () => {
       ok(CREATE_GRADE, { createGradeDto: { grade: 4.2, studentId: 6, subjectId: 10 } }, { createGrade: { id: "9" } }),
     ]);
     await screen.findByDisplayValue("5.5");
-    fireEvent.press(screen.getAllByText("Agregar nota")[1]);
+    await fireEvent.press(screen.getAllByText("Agregar nota")[1]);
     const inputs = screen.getAllByPlaceholderText("0,0");
-    fireEvent.changeText(inputs[inputs.length - 1], "4.2");
-    fireEvent.press(screen.getByText("Guardar cambios (1)"));
+    await fireEvent.changeText(inputs[inputs.length - 1], "4.2");
+    await fireEvent.press(screen.getByText("Guardar cambios (1)"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("Notas guardadas"));
   });
 
   it("rechaza notas fuera de la escala", async () => {
     await render();
-    fireEvent.changeText(await screen.findByDisplayValue("5.5"), "8");
-    fireEvent.press(screen.getByText("Guardar cambios (1)"));
+    await fireEvent.changeText(await screen.findByDisplayValue("5.5"), "8");
+    await fireEvent.press(screen.getByText("Guardar cambios (1)"));
     expect(notify).toHaveBeenCalledWith("Revisa los datos", "Todas las notas deben estar entre 1,0 y 7,0.");
   });
 
   it("elimina notas guardadas y descarta las no guardadas", async () => {
     await render([...baseMocks, ok(DELETE_GRADE, { id: 1 }, { deleteGrade: true })]);
     await screen.findByDisplayValue("5.5");
-    fireEvent.press(screen.getAllByText("Agregar nota")[1]);
+    await fireEvent.press(screen.getAllByText("Agregar nota")[1]);
     expect(screen.getAllByPlaceholderText("0,0")).toHaveLength(2);
-    fireEvent.press(screen.getAllByText("×")[1]);
+    await fireEvent.press(screen.getAllByText("×")[1]);
     await waitFor(() => expect(screen.getAllByPlaceholderText("0,0")).toHaveLength(1));
-    fireEvent.press(screen.getByText("×"));
+    await fireEvent.press(screen.getByText("×"));
     await waitFor(() => expect(screen.queryByDisplayValue("5.5")).toBeNull());
   });
 
@@ -370,19 +370,19 @@ describe("GradesScreen", () => {
     await render([...baseMocks, fail(DELETE_GRADE, { id: 1 })]);
     await screen.findByDisplayValue("5.5");
     (confirmAction as jest.Mock).mockResolvedValueOnce(false);
-    fireEvent.press(screen.getByText("×"));
+    await fireEvent.press(screen.getByText("×"));
     await waitFor(() => expect(confirmAction).toHaveBeenCalledTimes(1));
     expect(screen.getByDisplayValue("5.5")).toBeTruthy();
-    fireEvent.press(screen.getByText("×"));
+    await fireEvent.press(screen.getByText("×"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("No se pudo eliminar", expect.any(String)));
   });
 
   it("informa cuando falla el guardado y cuando no hay cambios", async () => {
     await render([...baseMocks, fail(UPDATE_GRADE, { id: 1, updateGradeDto: { grade: 6, studentId: 5, subjectId: 10 } })]);
     await screen.findByDisplayValue("5.5");
-    fireEvent.press(screen.getByText("Guardar cambios"));
-    fireEvent.changeText(screen.getByDisplayValue("5.5"), "6");
-    fireEvent.press(screen.getByText("Guardar cambios (1)"));
+    await fireEvent.press(screen.getByText("Guardar cambios"));
+    await fireEvent.changeText(screen.getByDisplayValue("5.5"), "6");
+    await fireEvent.press(screen.getByText("Guardar cambios (1)"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("No se pudieron guardar", expect.any(String)));
   });
 
@@ -413,15 +413,15 @@ describe("CourseAttendanceScreen", () => {
   it("abre el detalle de una asignatura y de un estudiante", async () => {
     const navigation = makeNavigation();
     await render(undefined, navigation);
-    fireEvent.press(await screen.findByText(/Matemática/));
+    await fireEvent.press(await screen.findByText(/Matemática/));
     expect(navigation.navigate).toHaveBeenCalledWith("SubjectDetail", { subjectId: 10 });
-    fireEvent.press(screen.getByText("Sofía Rojas"));
+    await fireEvent.press(screen.getByText("Sofía Rojas"));
     expect(navigation.navigate).toHaveBeenCalledWith("StudentAttendance", { student: expect.objectContaining({ id: "6" }) });
   });
 
   it("cambia de curso", async () => {
     await render();
-    fireEvent.press(await screen.findByText("3° Básico B"));
+    await fireEvent.press(await screen.findByText("3° Básico B"));
     expect(await screen.findByText(/0 estudiantes/)).toBeTruthy();
     expect(screen.getAllByText("Sin registros").length).toBeGreaterThan(0);
   });
@@ -429,7 +429,7 @@ describe("CourseAttendanceScreen", () => {
   it("muestra estados vacío y de error", async () => {
     const empty = await render([ok(COURSE_ATTENDANCE_SUMMARIES, undefined, { courseAttendanceSummaries: [] })]);
     expect(await screen.findByText("No hay cursos registrados")).toBeTruthy();
-    empty.unmount();
+    await empty.unmount();
     await render([fail(COURSE_ATTENDANCE_SUMMARIES, undefined)]);
     expect(await screen.findByText("No se pudo cargar el resumen de asistencia.")).toBeTruthy();
   });
@@ -453,7 +453,7 @@ describe("StudentAttendanceScreen", () => {
     expect(await screen.findByText("Juan Pérez")).toBeTruthy();
     expect(await screen.findByText(/2 asignaturas · 18 asistencias · 2 ausencias/)).toBeTruthy();
     expect(screen.getByText("18 asistencias · 2 ausencias")).toBeTruthy();
-    fireEvent.press(screen.getByText(/Matemática/));
+    await fireEvent.press(screen.getByText(/Matemática/));
     expect(navigation.navigate).toHaveBeenCalledWith("SubjectDetail", { subjectId: 10 });
   });
 
@@ -463,7 +463,7 @@ describe("StudentAttendanceScreen", () => {
       mocks: [ok(ATTENDANCE_BY_STUDENT, { studentId: 5 }, { attendanceByStudent: [] })],
     });
     expect(await screen.findByText("Sin asignaturas")).toBeTruthy();
-    empty.unmount();
+    await empty.unmount();
     await renderScreen(<StudentAttendanceScreen route={route} navigation={makeNavigation()} />, {
       session: makeSession("teacher"),
       mocks: [fail(ATTENDANCE_BY_STUDENT, { studentId: 5 })],
@@ -486,7 +486,7 @@ describe("AttendanceCalendarScreen", () => {
     expect(screen.getByLabelText("Sofía 2026-10-02")).toBeTruthy();
     expect(screen.getByText("50%")).toBeTruthy();
     expect(screen.getByText("-")).toBeTruthy();
-    fireEvent.press(screen.getByText("Juan Pérez"));
+    await fireEvent.press(screen.getByText("Juan Pérez"));
     expect(navigation.navigate).toHaveBeenCalledWith("StudentAttendance", { student: expect.objectContaining({ id: "5" }) });
   });
 
@@ -498,7 +498,7 @@ describe("AttendanceCalendarScreen", () => {
   it("informa errores y asignaturas inexistentes", async () => {
     const failed = await render([fail(SUBJECT_ATTENDANCE_CALENDAR, { subjectId: 10 })]);
     expect(await screen.findByText("No se pudo cargar el calendario de asistencia.")).toBeTruthy();
-    failed.unmount();
+    await failed.unmount();
     await render([ok(SUBJECT_ATTENDANCE_CALENDAR, { subjectId: 10 }, { subjectAttendanceCalendar: null })]);
     expect(await screen.findByText("La asignatura no existe o no está disponible.")).toBeTruthy();
   });

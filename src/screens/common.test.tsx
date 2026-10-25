@@ -37,11 +37,11 @@ describe("NoticesScreen", () => {
       mocks: [list, ok(CREATE_NOTICE, { title: "Paseo", description: "Salida a terreno", imageUrl: "https://a.cl/p.png" }, { createNotice: { isCreateNotice: true } })],
     });
     await screen.findByText("Reunión de apoderados");
-    fireEvent.press(await screen.findByText("Nuevo anuncio"));
-    fireEvent.changeText(screen.getByLabelText("Título"), "Paseo");
-    fireEvent.changeText(screen.getByLabelText("Mensaje"), "Salida a terreno");
-    fireEvent.changeText(screen.getByLabelText("URL de imagen (opcional)"), "https://a.cl/p.png");
-    fireEvent.press(screen.getByText("Publicar"));
+    await fireEvent.press(await screen.findByText("Nuevo anuncio"));
+    await fireEvent.changeText(screen.getByLabelText("Título"), "Paseo");
+    await fireEvent.changeText(screen.getByLabelText("Mensaje"), "Salida a terreno");
+    await fireEvent.changeText(screen.getByLabelText("URL de imagen (opcional)"), "https://a.cl/p.png");
+    await fireEvent.press(screen.getByText("Publicar"));
     await waitFor(() => expect(screen.queryByText("Publicar")).toBeNull());
   });
 
@@ -51,14 +51,14 @@ describe("NoticesScreen", () => {
       mocks: [list, ok(CREATE_NOTICE, { title: "Paseo", description: "Salida", imageUrl: null }, { createNotice: { isCreateNotice: false } })],
     });
     await screen.findByText("Reunión de apoderados");
-    fireEvent.press(await screen.findByText("Nuevo anuncio"));
-    fireEvent.press(screen.getByText("Publicar"));
+    await fireEvent.press(await screen.findByText("Nuevo anuncio"));
+    await fireEvent.press(screen.getByText("Publicar"));
     expect(notify).toHaveBeenLastCalledWith("Revisa los datos", "Completa el título y el mensaje.");
-    fireEvent.changeText(screen.getByLabelText("Título"), "Paseo");
-    fireEvent.changeText(screen.getByLabelText("Mensaje"), "Salida");
-    fireEvent.press(screen.getByText("Publicar"));
+    await fireEvent.changeText(screen.getByLabelText("Título"), "Paseo");
+    await fireEvent.changeText(screen.getByLabelText("Mensaje"), "Salida");
+    await fireEvent.press(screen.getByText("Publicar"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("No se pudo publicar", expect.any(String)));
-    fireEvent.press(screen.getByText("Cancelar"));
+    await fireEvent.press(screen.getByText("Cancelar"));
     expect(screen.queryByText("Publicar")).toBeNull();
   });
 
@@ -67,17 +67,17 @@ describe("NoticesScreen", () => {
       session: makeSession("teacher"),
       mocks: [list, ok(DELETE_NOTICE, { id: 1 }, { deleteNotice: true })],
     });
-    fireEvent.press(await screen.findByText("Eliminar"));
+    await fireEvent.press(await screen.findByText("Eliminar"));
     await waitFor(() => expect(confirmAction).toHaveBeenCalled());
   });
 
   it("no elimina si se cancela y reporta errores", async () => {
     await renderScreen(<NoticesScreen />, { session: makeSession("teacher"), mocks: [list, fail(DELETE_NOTICE, { id: 1 })] });
     (confirmAction as jest.Mock).mockResolvedValueOnce(false);
-    fireEvent.press(await screen.findByText("Eliminar"));
+    await fireEvent.press(await screen.findByText("Eliminar"));
     await waitFor(() => expect(confirmAction).toHaveBeenCalledTimes(1));
     expect(notify).not.toHaveBeenCalled();
-    fireEvent.press(screen.getByText("Eliminar"));
+    await fireEvent.press(screen.getByText("Eliminar"));
     await waitFor(() => expect(notify).toHaveBeenCalledWith("No se pudo eliminar", expect.any(String)));
   });
 
@@ -87,7 +87,7 @@ describe("NoticesScreen", () => {
       mocks: [ok(GET_ALL_NOTICES, undefined, { getAllNotices: [] })],
     });
     expect(await screen.findByText("No hay anuncios publicados")).toBeTruthy();
-    empty.unmount();
+    await empty.unmount();
     await renderScreen(<NoticesScreen />, { session: makeSession("parents"), mocks: [fail(GET_ALL_NOTICES, undefined)] });
     expect(await screen.findByText("No se pudieron cargar los anuncios.")).toBeTruthy();
   });
@@ -103,7 +103,7 @@ describe("ContactsScreen", () => {
       mocks: [ok(CHAT_CONTACTS, undefined, { chatContacts: [contact] })],
     });
     expect(await screen.findByText("Paula Apoderada")).toBeTruthy();
-    fireEvent.press(screen.getByText("Abrir chat"));
+    await fireEvent.press(screen.getByText("Abrir chat"));
     expect(navigation.navigate).toHaveBeenCalledWith("Chat", { contact });
   });
 
@@ -114,7 +114,7 @@ describe("ContactsScreen", () => {
     });
     expect(await screen.findByText("Aún no tienes contactos")).toBeTruthy();
     expect(screen.getByText("Conversa con los profesores de tus pupilos")).toBeTruthy();
-    empty.unmount();
+    await empty.unmount();
     await renderScreen(<ContactsScreen navigation={makeNavigation()} />, { session: makeSession("teacher"), mocks: [fail(CHAT_CONTACTS, undefined)] });
     expect(await screen.findByText("No se pudieron cargar tus contactos.")).toBeTruthy();
   });
@@ -143,8 +143,8 @@ describe("ChatScreen", () => {
       mocks: [ok(CONVERSATION, { withId: 4 }, { conversation: [] }), ok(SEND_MESSAGE, { toId: 4, content: "Hola" }, { sendMessage: { id: "3" } })],
     });
     expect(await screen.findByText("Aún no hay mensajes")).toBeTruthy();
-    fireEvent.changeText(screen.getByPlaceholderText("Escribe un mensaje"), "Hola");
-    fireEvent.press(screen.getByText("Enviar"));
+    await fireEvent.changeText(screen.getByPlaceholderText("Escribe un mensaje"), "Hola");
+    await fireEvent.press(screen.getByText("Enviar"));
     await waitFor(() => expect(screen.getByPlaceholderText("Escribe un mensaje").props.value).toBe(""));
   });
 
@@ -154,10 +154,10 @@ describe("ChatScreen", () => {
       mocks: [ok(CONVERSATION, { withId: 4 }, { conversation: [] }), fail(SEND_MESSAGE, { toId: 4, content: "Hola" })],
     });
     await screen.findByText("Aún no hay mensajes");
-    fireEvent(screen.getByPlaceholderText("Escribe un mensaje"), "submitEditing");
+    await fireEvent(screen.getByPlaceholderText("Escribe un mensaje"), "submitEditing");
     expect(notify).not.toHaveBeenCalled();
-    fireEvent.changeText(screen.getByPlaceholderText("Escribe un mensaje"), "Hola");
-    fireEvent(screen.getByPlaceholderText("Escribe un mensaje"), "submitEditing");
+    await fireEvent.changeText(screen.getByPlaceholderText("Escribe un mensaje"), "Hola");
+    await fireEvent(screen.getByPlaceholderText("Escribe un mensaje"), "submitEditing");
     await waitFor(() => expect(notify).toHaveBeenCalledWith("No se pudo enviar", expect.any(String)));
   });
 });
@@ -167,9 +167,9 @@ describe("ProfileScreen", () => {
     const navigation = makeNavigation();
     await renderScreen(<ProfileScreen navigation={navigation} />, { session: makeSession("parents", { firstName: "Paula" }) });
     expect(await screen.findByText("Apoderado")).toBeTruthy();
-    fireEvent.press(screen.getByText("Cambiar contraseña"));
+    await fireEvent.press(screen.getByText("Cambiar contraseña"));
     expect(navigation.navigate).toHaveBeenCalledWith("ChangePassword");
-    fireEvent.press(screen.getByText("Cerrar sesión"));
+    await fireEvent.press(screen.getByText("Cerrar sesión"));
     await waitFor(async () => expect(await AsyncStorage.getItem("aulaconecta.session")).toBeNull());
   });
 

@@ -8,6 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import client from "./src/apollo";
 import { AuthProvider, useAuth } from "./src/auth/AuthContext";
+import ErrorBoundary from "./src/components/ErrorBoundary";
 import { Loading } from "./src/components/ui";
 import { ChangePasswordScreen, ForgotPassScreen, LoginScreen, RegisterScreen } from "./src/screens/auth";
 import { ChatScreen, ContactsScreen, NoticesScreen, ProfileScreen } from "./src/screens/common";
@@ -148,14 +149,16 @@ const Root = () => {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <ApolloProvider client={client}>
-        <AuthProvider>
-          <NavigationContainer theme={theme}>
-            <StatusBar style="light" />
-            <Root />
-          </NavigationContainer>
-        </AuthProvider>
-      </ApolloProvider>
+      <ErrorBoundary>
+        <ApolloProvider client={client}>
+          <AuthProvider>
+            <NavigationContainer theme={theme}>
+              <StatusBar style="light" />
+              <Root />
+            </NavigationContainer>
+          </AuthProvider>
+        </ApolloProvider>
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }

@@ -146,12 +146,13 @@ describe("ForgotPassScreen", () => {
 });
 
 describe("ChangePasswordScreen", () => {
-  const render = (session = makeSession("teacher", { isChangePassword: true }), mocks = [ok(CHANGE_PASSWORD, { newPassword: "Clave12345" }, { changePassword: { message: "ok" } })]) =>
+  const render = (session = makeSession("teacher", { isChangePassword: true }), mocks = [ok(CHANGE_PASSWORD, { currentPassword: "Demo1234", newPassword: "Clave12345" }, { changePassword: { message: "ok" } })]) =>
     renderScreen(<ChangePasswordScreen />, { session, mocks, withNavigation: true });
 
   it("actualiza la contraseña y marca la sesión como actualizada", async () => {
     await render();
     await screen.findByText(/debes definir una nueva contraseña/);
+    fireEvent.changeText(screen.getByLabelText(/Contraseña (actual|temporal)/), "Demo1234");
     fireEvent.changeText(screen.getByLabelText("Nueva contraseña"), "Clave12345");
     fireEvent.changeText(screen.getByLabelText("Confirmar contraseña"), "Clave12345");
     press("Guardar contraseña");
@@ -164,11 +165,23 @@ describe("ChangePasswordScreen", () => {
     await screen.findByText(/Define una nueva contraseña/);
     fireEvent.changeText(screen.getByLabelText("Nueva contraseña"), "corta");
     press("Guardar contraseña");
+    expect(notify).toHaveBeenLastCalledWith("Revisa los datos", "Ingresa tu contraseña actual.");
+    fireEvent.changeText(screen.getByLabelText("Contraseña actual"), "Demo1234");
+    press("Guardar contraseña");
     expect(notify).toHaveBeenLastCalledWith("Revisa los datos", "La contraseña debe tener al menos 8 caracteres.");
     fireEvent.changeText(screen.getByLabelText("Nueva contraseña"), "Clave12345");
     fireEvent.changeText(screen.getByLabelText("Confirmar contraseña"), "Distinta123");
     press("Guardar contraseña");
     expect(notify).toHaveBeenLastCalledWith("Revisa los datos", "Las contraseñas no coinciden.");
+    fireEvent.changeText(screen.getByLabelText("Nueva contraseña"), "Demo1234");
+    press("Guardar contraseña");
+    expect(notify).toHaveBeenLastCalledWith("Revisa los datos", "La nueva contraseña debe ser distinta de la actual.");
+  });
+
+  it("pide la contraseña temporal cuando el cambio es obligatorio", async () => {
+    await render();
+    await screen.findByText(/debes definir una nueva contraseña/);
+    expect(screen.getByLabelText("Contraseña temporal")).toBeTruthy();
   });
 
   it("cierra la sesión y avisa cuando el servidor informa que expiró", async () => {
@@ -180,8 +193,9 @@ describe("ChangePasswordScreen", () => {
   });
 
   it("informa errores y permite cerrar sesión", async () => {
-    await render(makeSession("teacher"), [fail(CHANGE_PASSWORD, { newPassword: "Clave12345" }, "Falla")]);
+    await render(makeSession("teacher"), [fail(CHANGE_PASSWORD, { currentPassword: "Demo1234", newPassword: "Clave12345" }, "Falla")]);
     await screen.findByText(/Define una nueva contraseña/);
+    fireEvent.changeText(screen.getByLabelText(/Contraseña (actual|temporal)/), "Demo1234");
     fireEvent.changeText(screen.getByLabelText("Nueva contraseña"), "Clave12345");
     fireEvent.changeText(screen.getByLabelText("Confirmar contraseña"), "Clave12345");
     press("Guardar contraseña");

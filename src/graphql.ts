@@ -77,8 +77,8 @@ export const FORGOT_PASS = gql`
 `;
 
 export const CHANGE_PASSWORD = gql`
-  mutation ChangePassword($newPassword: String!) {
-    changePassword(newPassword: $newPassword) {
+  mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
+    changePassword(currentPassword: $currentPassword, newPassword: $newPassword) {
       message
     }
   }

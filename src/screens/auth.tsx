@@ -203,14 +203,23 @@ export const ForgotPassScreen = ({ navigation }: { navigation: any }) => {
 export const ChangePasswordScreen = () => {
   const { session, markPasswordChanged, signOut } = useAuth();
   const navigation = useNavigation();
+  const [current, setCurrent] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [changePassword, { loading }] = useMutation(CHANGE_PASSWORD);
 
   const handleSubmit = async () => {
+    if (!current) {
+      notify("Revisa los datos", "Ingresa tu contraseña actual.");
+      return;
+    }
     const problema = passwordError(password);
     if (problema) {
       notify("Revisa los datos", problema);
+      return;
+    }
+    if (password === current) {
+      notify("Revisa los datos", "La nueva contraseña debe ser distinta de la actual.");
       return;
     }
     if (password !== confirm) {
@@ -218,7 +227,7 @@ export const ChangePasswordScreen = () => {
       return;
     }
     try {
-      await changePassword({ variables: { newPassword: password } });
+      await changePassword({ variables: { currentPassword: current, newPassword: password } });
       notify("Contraseña actualizada");
       await markPasswordChanged();
       if (navigation.canGoBack()) {
@@ -240,6 +249,7 @@ export const ChangePasswordScreen = () => {
         }
       />
       <Card>
+        <Field label={session?.isChangePassword ? "Contraseña temporal" : "Contraseña actual"} value={current} onChangeText={setCurrent} secureTextEntry />
         <Field label="Nueva contraseña" value={password} onChangeText={setPassword} secureTextEntry />
         <Field label="Confirmar contraseña" value={confirm} onChangeText={setConfirm} secureTextEntry />
         <Button label="Guardar contraseña" onPress={handleSubmit} loading={loading} />

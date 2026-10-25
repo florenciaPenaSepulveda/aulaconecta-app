@@ -1,5 +1,5 @@
 import React from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { NavigationContainer } from "@react-navigation/native";
 import { View } from "react-native";
 import { render, screen, waitFor } from "@testing-library/react-native";
@@ -41,9 +41,9 @@ export const fail = (
 export const makeNavigation = () => ({ navigate: jest.fn(), goBack: jest.fn(), canGoBack: jest.fn(() => true) });
 
 export const prepare = async (session: Session | null) => {
-  await AsyncStorage.clear();
+  (SecureStore as unknown as { __vaciar: () => void }).__vaciar();
   if (session) {
-    await AsyncStorage.setItem("aulaconecta.session", JSON.stringify(session));
+    await SecureStore.setItemAsync("aulaconecta.session", JSON.stringify(session));
   }
   (confirmAction as jest.Mock).mockResolvedValue(true);
 };

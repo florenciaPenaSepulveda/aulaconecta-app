@@ -1,9 +1,10 @@
 import React from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import * as SecureStore from "expo-secure-store";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { ChangePasswordScreen, ForgotPassScreen, LoginScreen, RegisterScreen } from "./auth";
 import { CHANGE_PASSWORD, FORGOT_PASS, LOGIN, REGISTER } from "../graphql";
 import { notify } from "../lib/alerts";
+import { notifySessionExpired } from "../lib/session";
 import { fail, makeNavigation, makeSession, ok, renderScreen } from "../test/utils";
 
 const press = (text: string) => fireEvent.press(screen.getAllByText(text).slice(-1)[0]);
@@ -21,7 +22,7 @@ describe("LoginScreen", () => {
       mocks: [ok(LOGIN, credentials, { login: { token: "jwt", id: 7, role: "Teacher", firstName: "Carlos", isChangePassword: false } })],
     });
     fillAndSubmit();
-    await waitFor(async () => expect(JSON.parse((await AsyncStorage.getItem("aulaconecta.session")) ?? "null")).toMatchObject({ token: "jwt", role: "teacher", id: 7 }));
+    await waitFor(async () => expect(JSON.parse((await SecureStore.getItemAsync("aulaconecta.session")) ?? "null")).toMatchObject({ token: "jwt", role: "teacher", id: 7 }));
   });
 
   it("valida que haya correo y contraseña", async () => {
@@ -99,6 +100,9 @@ describe("RegisterScreen", () => {
     fill("123456785", "corta", "corta");
     press("Crear cuenta");
     expect(notify).toHaveBeenLastCalledWith("Revisa los datos", "La contraseña debe tener al menos 8 caracteres.");
+    fill("123456785", "soloLetrasAqui", "soloLetrasAqui");
+    press("Crear cuenta");
+    expect(notify).toHaveBeenLastCalledWith("Revisa los datos", "La contraseña debe incluir letras y números.");
     fill("123456785", "Clave12345", "Distinta123");
     press("Crear cuenta");
     expect(notify).toHaveBeenLastCalledWith("Revisa los datos", "Las contraseñas no coinciden.");
@@ -151,7 +155,7 @@ describe("ChangePasswordScreen", () => {
     fireEvent.changeText(screen.getByLabelText("Nueva contraseña"), "Clave12345");
     fireEvent.changeText(screen.getByLabelText("Confirmar contraseña"), "Clave12345");
     press("Guardar contraseña");
-    await waitFor(async () => expect(JSON.parse((await AsyncStorage.getItem("aulaconecta.session")) ?? "{}").isChangePassword).toBe(false));
+    await waitFor(async () => expect(JSON.parse((await SecureStore.getItemAsync("aulaconecta.session")) ?? "{}").isChangePassword).toBe(false));
     expect(notify).toHaveBeenCalledWith("Contraseña actualizada");
   });
 
@@ -167,6 +171,14 @@ describe("ChangePasswordScreen", () => {
     expect(notify).toHaveBeenLastCalledWith("Revisa los datos", "Las contraseñas no coinciden.");
   });
 
+  it("cierra la sesión y avisa cuando el servidor informa que expiró", async () => {
+    await render(makeSession("teacher"));
+    await screen.findByText(/Define una nueva contraseña/);
+    act(() => notifySessionExpired());
+    await waitFor(() => expect(notify).toHaveBeenCalledWith("Tu sesión expiró", "Inicia sesión nuevamente para continuar."));
+    await waitFor(async () => expect(await SecureStore.getItemAsync("aulaconecta.session")).toBeNull());
+  });
+
   it("informa errores y permite cerrar sesión", async () => {
     await render(makeSession("teacher"), [fail(CHANGE_PASSWORD, { newPassword: "Clave12345" }, "Falla")]);
     await screen.findByText(/Define una nueva contraseña/);
@@ -175,6 +187,6 @@ describe("ChangePasswordScreen", () => {
     press("Guardar contraseña");
     await waitFor(() => expect(notify).toHaveBeenCalledWith("No se pudo cambiar la contraseña", "Falla"));
     fireEvent.press(screen.getByText("Cerrar sesión"));
-    await waitFor(async () => expect(await AsyncStorage.getItem("aulaconecta.session")).toBeNull());
+    await waitFor(async () => expect(await SecureStore.getItemAsync("aulaconecta.session")).toBeNull());
   });
 });

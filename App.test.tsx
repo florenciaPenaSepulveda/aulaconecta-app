@@ -1,5 +1,5 @@
 import React from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import App from "./App";
 import { makeSession } from "./src/test/utils";
@@ -32,9 +32,9 @@ const mockFetch = () =>
   }) as unknown as typeof fetch);
 
 const startWith = async (session: ReturnType<typeof makeSession> | null) => {
-  await AsyncStorage.clear();
+  (SecureStore as unknown as { __vaciar: () => void }).__vaciar();
   if (session) {
-    await AsyncStorage.setItem("aulaconecta.session", JSON.stringify(session));
+    await SecureStore.setItemAsync("aulaconecta.session", JSON.stringify(session));
   }
   mockFetch();
   return render(<App />);

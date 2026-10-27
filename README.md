@@ -4,6 +4,15 @@
 
 Aplicación móvil de **AulaConecta**, plataforma de gestión escolar para profesores y apoderados. Construida con Expo SDK 58, React Native 0.88 y React 19; también corre en el navegador.
 
+## Inicio rápido
+
+```
+npm install
+npm run web
+```
+
+Abre `http://localhost:8081` (requiere el [backend](https://github.com/florenciaPenaSepulveda/aulaconecta-backend) en ejecución). Pruebas con 98 % de cobertura (`npm test`).
+
 ## Repositorios del proyecto
 
 | Repositorio | Descripción |
@@ -24,12 +33,7 @@ Aplicación móvil de **AulaConecta**, plataforma de gestión escolar para profe
 
 ## Verla en el computador
 
-```
-npm install
-npm run web
-```
-
-Abre `http://localhost:8081`. Para una vista parecida a un teléfono, usa el modo dispositivo del navegador (F12).
+Los comandos están en [Inicio rápido](#inicio-rápido). Abre `http://localhost:8081`. Para una vista parecida a un teléfono, usa el modo dispositivo del navegador (F12).
 
 ## Verla en un teléfono
 
